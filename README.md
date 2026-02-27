@@ -27,11 +27,39 @@ When adding this element to a **Content type** in Kontent.ai, you must provide t
 
 | Parameter | Required | Description |
 |---|---|---|
-| `apiEndpoint` | Yes | Full URL of the serverless function that accepts a `?codename=` query parameter and returns `{ slug, screenPageViews, activeUsers }`. |
+| `apiEndpoint` | Yes | Full URL of the serverless function that accepts a `?codename=` query parameter. |
 
-The element will call `GET {apiEndpoint}?codename={item_codename}` and display the result. You can use a different endpoint URL per content type — just update the JSON parameters for each one.
+The element calls `GET {apiEndpoint}?codename={item_codename}` and expects this JSON response:
 
-If the JSON parameters are missing or `apiEndpoint` is not a string, the element will display a configuration error before loading.
+```json
+{
+  "slug": "/research/my-article",
+  "historical": {
+    "views": 1234,
+    "users": 890
+  },
+  "realtime": {
+    "views": 3,
+    "activeUsers": 1
+  },
+  "gaLink": "https://analytics.google.com/analytics/web/#/p12345/..."
+}
+```
+
+| Field | Source | Description |
+|---|---|---|
+| `historical.views` | GA4 Reporting API | Page views over the past 30 days — shown in the **30 Day Performance** card |
+| `historical.users` | GA4 Reporting API | Unique users over the past 30 days |
+| `realtime.activeUsers` | GA4 Real-Time API | Users active on the page right now (last 30 min) — shown in the **Live Now** card |
+| `realtime.views` | GA4 Real-Time API | Page views in the last 30 minutes |
+| `gaLink` | — | Optional. If present, a **View Full Report in GA4** button appears |
+| `slug` | — | Resolved URL path for the content item |
+
+> **Historical vs Real-time:** Historical data is processed by GA4 with a 24–48 hour delay, so recent traffic may not appear immediately. Real-time data reflects the last 30 minutes and updates each time the element loads. A realtime count of 0 is normal — it simply means nobody is on the page right now.
+
+You can use a different endpoint URL per content type — just update the JSON parameters for each element instance.
+
+If `apiEndpoint` is missing or not a string, the element shows a configuration error before making any network request.
 
 ---
 
