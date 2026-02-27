@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>GA4 Analytics</title>
-  <!-- Kontent.ai app styles (fonts, base tokens) -->
+  <!-- Kontent.ai app styles — includes Inter font -->
   <link rel="stylesheet" type="text/css" href="/kontent-ai-app-styles.css" />
   <!-- Kontent.ai Custom Element SDK -->
   <script src="https://app.kontent.ai/js-api/custom-element/v1/custom-element.min.js"></script>
@@ -15,416 +15,334 @@
 
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #f9fafb;
-      color: #111827;
-      padding: 20px;
-      /* Prevent the body from ever growing a scrollbar inside the iframe */
+      background: #f4f7f9;
+      padding: 16px;
       overflow: hidden;
+      color: #1a202c;
+      font-size: 14px;
     }
 
     /* ─── Spinner ────────────────────────────────────────────────────── */
     @keyframes spin { to { transform: rotate(360deg); } }
 
     .spinner {
-      width: 18px; height: 18px;
-      border: 2px solid #e5e7eb;
+      width: 20px; height: 20px;
+      border: 2px solid #cbd5e0;
       border-top-color: #3b82f6;
       border-radius: 50%;
-      animation: spin 0.75s linear infinite;
+      animation: spin 0.7s linear infinite;
       flex-shrink: 0;
     }
 
     /* ─── Pulsing live dot ───────────────────────────────────────────── */
     @keyframes pulse-ring {
-      0%   { box-shadow: 0 0 0 0   rgba(16, 185, 129, 0.55); }
-      70%  { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
-      100% { box-shadow: 0 0 0 0   rgba(16, 185, 129, 0); }
+      0%   { box-shadow: 0 0 0 0   rgba(34, 197, 94, 0.6); }
+      70%  { box-shadow: 0 0 0 7px rgba(34, 197, 94, 0); }
+      100% { box-shadow: 0 0 0 0   rgba(34, 197, 94, 0); }
     }
 
     .live-dot {
-      width: 10px; height: 10px;
-      background: #10b981;
+      width: 9px; height: 9px;
+      background: #22c55e;
       border-radius: 50%;
       flex-shrink: 0;
       animation: pulse-ring 2s ease-out infinite;
     }
 
-    /* ─── States ────────────────────────────────────────────────────── */
+    /* ─── Loading state ──────────────────────────────────────────────── */
     #state-loading {
       display: flex;
       align-items: center;
       gap: 10px;
-      padding: 24px 4px;
-      color: #6b7280;
-      font-size: 14px;
+      padding: 28px 4px;
+      color: #718096;
+      font-size: 13px;
     }
 
+    /* ─── Error state ────────────────────────────────────────────────── */
     #state-error {
       display: none;
       padding: 14px 16px;
-      background: #fef2f2;
-      border: 1px solid #fecaca;
-      border-radius: 8px;
+      background: #fff5f5;
+      border: 1px solid #fed7d7;
+      border-radius: 10px;
     }
 
+    /* ─── Dashboard (hidden until data loads) ─────────────────────────── */
     #state-dashboard { display: none; }
 
-    /* ─── Header ─────────────────────────────────────────────────────── */
-    .header { margin-bottom: 16px; }
+    /* ─── Widget card ────────────────────────────────────────────────── */
+    .widget {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+      overflow: hidden;
+    }
 
-    .header h1 {
-      font-size: 16px;
+    /* ─── Widget header ──────────────────────────────────────────────── */
+    .widget-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .widget-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #a0aec0;
+      margin-bottom: 6px;
+    }
+
+    .widget-title {
+      font-size: 15px;
       font-weight: 700;
-      color: #111827;
-      margin-bottom: 5px;
+      color: #1a202c;
+      line-height: 1.3;
+      margin-bottom: 4px;
     }
 
-    .item-meta {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 12px;
-      color: #6b7280;
-      flex-wrap: wrap;
-    }
-
-    .item-code {
+    .widget-codename {
       font-family: 'SFMono-Regular', Consolas, monospace;
       font-size: 11px;
-      background: #f3f4f6;
-      border: 1px solid #e5e7eb;
-      padding: 1px 6px;
+      color: #718096;
+      background: #f7fafc;
+      border: 1px solid #e2e8f0;
+      padding: 2px 6px;
       border-radius: 4px;
-      color: #374151;
+      display: inline-block;
     }
 
-    /* ─── Two-column grid ────────────────────────────────────────────── */
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-bottom: 12px;
-    }
-
-    /* ─── Card base ──────────────────────────────────────────────────── */
-    .card {
-      background: #ffffff;
-      border: 1px solid #e5e7eb;
-      border-radius: 10px;
-      padding: 20px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-    }
-
-    .card-label {
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.07em;
-      text-transform: uppercase;
-      color: #9ca3af;
-      margin-bottom: 14px;
-    }
-
-    /* ─── 30-day perf card ───────────────────────────────────────────── */
-    .perf-stats {
+    /* ─── Live Now row ───────────────────────────────────────────────── */
+    .live-row {
       display: flex;
-      gap: 28px;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid #e2e8f0;
+      background: #f0fdf4;
     }
 
-    .stat-label {
-      font-size: 12px;
-      color: #6b7280;
-      margin-bottom: 5px;
-    }
-
-    .stat-value {
-      font-size: 30px;
-      font-weight: 700;
-      color: #111827;
-      line-height: 1;
-    }
-
-    /* ─── Live card ──────────────────────────────────────────────────── */
     .live-badge {
       display: flex;
       align-items: center;
       gap: 7px;
-      margin-bottom: 12px;
     }
 
     .live-badge-text {
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.07em;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
-      color: #10b981;
+      color: #16a34a;
     }
 
-    .live-window {
-      font-size: 10px;
-      color: #9ca3af;
+    .live-badge-window {
+      font-size: 11px;
+      color: #86efac;
       font-weight: 400;
-      text-transform: none;
-      letter-spacing: normal;
-      margin-left: 2px;
     }
 
-    /* ─── Zero-data message ──────────────────────────────────────────── */
+    .live-stat {
+      text-align: right;
+    }
+
+    .live-count {
+      font-size: 32px;
+      font-weight: 700;
+      color: #15803d;
+      line-height: 1;
+      margin-bottom: 2px;
+    }
+
+    .live-sublabel {
+      font-size: 11px;
+      color: #4ade80;
+      font-weight: 500;
+    }
+
+    /* ─── 30-Day stats section ───────────────────────────────────────── */
+    .stats-section {
+      padding: 16px 20px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .stats-section-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #a0aec0;
+      margin-bottom: 14px;
+    }
+
+    .stats-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .stats-table tr {
+      border-bottom: 1px solid #f0f4f8;
+    }
+
+    .stats-table tr:last-child {
+      border-bottom: none;
+    }
+
+    .stats-table td {
+      padding: 10px 0;
+      vertical-align: middle;
+    }
+
+    .stats-metric-name {
+      font-size: 13px;
+      color: #4a5568;
+      font-weight: 500;
+    }
+
+    .stats-metric-value {
+      text-align: right;
+      font-size: 24px;
+      font-weight: 700;
+      color: #1a202c;
+      line-height: 1;
+    }
+
+    /* ─── Zero / no-data state ───────────────────────────────────────── */
     .no-data {
       font-size: 12px;
-      color: #9ca3af;
+      color: #a0aec0;
       font-style: italic;
       line-height: 1.5;
-    }
-
-    /* ─── Guidelines / tooltip row ───────────────────────────────────── */
-    .guidelines-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-
-    /* The ⓘ icon that triggers the tooltip */
-    .info-trigger {
-      position: relative;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 18px; height: 18px;
-      background: #e5e7eb;
-      border-radius: 50%;
-      font-size: 10px;
-      font-weight: 700;
-      color: #6b7280;
-      cursor: default;
-      flex-shrink: 0;
-      user-select: none;
-      transition: background 0.15s;
-    }
-    .info-trigger:hover { background: #d1d5db; }
-
-    /* Tooltip bubble */
-    .info-tooltip {
-      position: absolute;
-      bottom: calc(100% + 8px);
-      left: 0;
-      transform: none;
-      width: 310px;
-      background: #1f2937;
-      color: #f3f4f6;
-      font-size: 12px;
       font-weight: 400;
-      line-height: 1.6;
-      padding: 14px;
-      border-radius: 8px;
-      pointer-events: none;
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.15s ease, visibility 0.15s ease;
-      z-index: 100;
-      text-transform: none;
-      letter-spacing: normal;
-      white-space: normal;
     }
 
-    /* Caret — aligned to the left so it sits under the ⓘ icon */
-    .info-tooltip::after {
-      content: '';
-      position: absolute;
-      top: 100%; left: 10px;
-      border: 6px solid transparent;
-      border-top-color: #1f2937;
+    /* ─── GA4 button section ─────────────────────────────────────────── */
+    .ga4-section {
+      padding: 14px 20px;
+      border-bottom: 1px solid #e2e8f0;
     }
 
-    /* Show on hover */
-    .info-trigger:hover .info-tooltip {
-      opacity: 1;
-      visibility: visible;
-    }
-
-    /* Tooltip internal layout */
-    .tip-section { }
-
-    .tip-heading {
-      display: flex;
-      align-items: flex-start;
-      gap: 5px;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      color: #d1d5db;
-      margin-bottom: 6px;
-    }
-
-    .tip-body {
-      font-size: 11.5px;
-      color: #9ca3af;
-      line-height: 1.65;
-    }
-
-    .tip-note {
-      display: block;
-      margin-top: 5px;
-      color: #6b7280;
-      font-size: 11px;
-    }
-
-    .tip-divider {
-      height: 1px;
-      background: #374151;
-      margin: 11px 0;
-    }
-
-    .guidelines-hint {
-      font-size: 12px;
-      color: #9ca3af;
-    }
-
-    /* ─── GA4 link button ────────────────────────────────────────────── */
     .ga4-btn {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
+      gap: 7px;
       width: 100%;
-      padding: 10px 16px;
-      background: #eff6ff;
-      border: 1px solid #bfdbfe;
+      padding: 10px 18px;
+      background: #ffffff;
+      border: 1.5px solid #3b82f6;
       border-radius: 8px;
       color: #2563eb;
       font-size: 13px;
-      font-weight: 500;
+      font-weight: 600;
+      font-family: inherit;
       text-decoration: none;
-      transition: background 0.15s, border-color 0.15s;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
       cursor: pointer;
+      line-height: 1;
     }
-    .ga4-btn:hover { background: #dbeafe; border-color: #93c5fd; }
 
-    /* External-link icon */
-    .ga4-icon {
+    .ga4-btn:hover {
+      background: #eff6ff;
+      border-color: #2563eb;
+    }
+
+    .ga4-btn svg {
       width: 13px; height: 13px;
       flex-shrink: 0;
-      opacity: 0.75;
+      opacity: 0.8;
+    }
+
+    /* ─── Footer note ────────────────────────────────────────────────── */
+    .footer-note {
+      padding: 12px 20px;
+      background: #f7fafc;
+      font-size: 11.5px;
+      color: #718096;
+      line-height: 1.65;
     }
   </style>
 </head>
 <body>
 
-  <!-- ① Loading state ──────────────────────────────────────────────── -->
+  <!-- ① Loading ─────────────────────────────────────────────────────── -->
   <div id="state-loading">
     <div class="spinner"></div>
     <span>Loading analytics data…</span>
   </div>
 
-  <!-- ② Error state ────────────────────────────────────────────────── -->
+  <!-- ② Error ───────────────────────────────────────────────────────── -->
   <div id="state-error">
-    <div style="font-size:13px; font-weight:600; color:#b91c1c; margin-bottom:4px;">
+    <div style="font-size:13px; font-weight:600; color:#c53030; margin-bottom:5px;">
       Failed to load analytics
     </div>
-    <div id="error-message" style="font-size:12px; color:#ef4444;"></div>
+    <div id="error-message" style="font-size:12px; color:#e53e3e;"></div>
   </div>
 
-  <!-- ③ Dashboard ──────────────────────────────────────────────────── -->
+  <!-- ③ Dashboard ───────────────────────────────────────────────────── -->
   <div id="state-dashboard">
+    <div class="widget">
 
-    <!-- Header -->
-    <div class="header">
-      <h1>GA4 Analytics</h1>
-      <div class="item-meta">
-        <span id="item-name"></span>
-        <span>·</span>
-        <code class="item-code" id="item-codename"></code>
-      </div>
-    </div>
-
-    <!-- Two-column grid -->
-    <div class="grid">
-
-      <!-- Left: 30 Day Performance -->
-      <div class="card">
-        <div class="card-label">30 Day Performance</div>
-        <div class="perf-stats">
-          <div>
-            <div class="stat-label">Views</div>
-            <div id="stat-views" class="stat-value">—</div>
-          </div>
-          <div>
-            <div class="stat-label">Users</div>
-            <div id="stat-users" class="stat-value">—</div>
-          </div>
-        </div>
+      <!-- Header: item title + codename -->
+      <div class="widget-header">
+        <div class="widget-label">Content Analytics</div>
+        <div class="widget-title" id="item-title"></div>
+        <code class="widget-codename" id="item-codename"></code>
       </div>
 
-      <!-- Right: Live Now -->
-      <div class="card">
+      <!-- Live Now -->
+      <div class="live-row">
         <div class="live-badge">
           <div class="live-dot"></div>
           <span class="live-badge-text">Live Now</span>
-          <span class="live-window">last 30 min</span>
+          <span class="live-badge-window">· last 30 min</span>
         </div>
-        <div class="perf-stats">
-          <div>
-            <div class="stat-label">Active Users</div>
-            <div id="live-users" class="stat-value">—</div>
-          </div>
-          <div>
-            <div class="stat-label">Views</div>
-            <div id="live-views" class="stat-value">—</div>
-          </div>
+        <div class="live-stat">
+          <div class="live-count" id="live-users">—</div>
+          <div class="live-sublabel">Active Users</div>
         </div>
       </div>
 
-    </div><!-- /grid -->
-
-    <!-- Guidelines row -->
-    <div class="guidelines-row">
-      <div class="info-trigger">
-        i
-        <div class="info-tooltip">
-          <div class="tip-section">
-            <div class="tip-heading">
-              <svg width="10" height="10" viewBox="0 0 20 20" fill="#9ca3af" style="flex-shrink:0;margin-top:1px"><path d="M10 2a8 8 0 100 16A8 8 0 0010 2zm0 3a1 1 0 110 2 1 1 0 010-2zm1 9H9v-5h2v5z"/></svg>
-              Historical — left card
-            </div>
-            <div class="tip-body">
-              Aggregated data from the <strong>GA4 Reporting API</strong>, covering the past 30 days.
-              This includes all sessions, pageviews, and users, even from returning visitors.<br>
-              <span class="tip-note">⚠ New activity can take <strong>24–48 hours</strong> to appear here as GA4 processes and de-duplicates its data pipeline.</span>
-            </div>
-          </div>
-          <div class="tip-divider"></div>
-          <div class="tip-section">
-            <div class="tip-heading">
-              <svg width="10" height="10" viewBox="0 0 10 10" style="flex-shrink:0;margin-top:1px"><circle cx="5" cy="5" r="5" fill="#10b981"/></svg>
-              Real-time — right card
-            </div>
-            <div class="tip-body">
-              Live data from the <strong>GA4 Real-Time API</strong>. Shows users and page views recorded within the <strong>last 30 minutes</strong>.<br>
-              <span class="tip-note">✓ A count of 0 simply means no one is on this page right now — not a data issue.</span>
-            </div>
-          </div>
-        </div>
+      <!-- 30-Day Performance stats -->
+      <div class="stats-section">
+        <div class="stats-section-label">30-Day Performance</div>
+        <table class="stats-table">
+          <tr>
+            <td class="stats-metric-name">Page Views</td>
+            <td class="stats-metric-value" id="stat-views">—</td>
+          </tr>
+          <tr>
+            <td class="stats-metric-name">Users</td>
+            <td class="stats-metric-value" id="stat-users">—</td>
+          </tr>
+        </table>
       </div>
-      <span class="guidelines-hint">Hover for data notes</span>
-    </div>
 
-    <!-- GA4 deep-link button -->
-    <a id="ga4-link" class="ga4-btn" target="_blank" rel="noreferrer noopener">
-      View Full Report in GA4
-      <svg class="ga4-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M11 3h6v6M17 3l-9 9M8 5H5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3" />
-      </svg>
-    </a>
+      <!-- GA4 deep-link button -->
+      <div class="ga4-section">
+        <a id="ga4-link" class="ga4-btn" target="_blank" rel="noreferrer noopener">
+          View full report in Google Analytics
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 3h6v6M17 3l-9 9M8 5H5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3" />
+          </svg>
+        </a>
+      </div>
 
+      <!-- Educational footer note -->
+      <div class="footer-note">
+        ⚠️ <strong>Note:</strong> Real-time stats show the last 30 minutes.
+        Historical stats (30 days) take 24–48 hours to process and appear here.
+      </div>
+
+    </div><!-- /widget -->
   </div><!-- /dashboard -->
 
   <script>
-    /* ──────────────────────────────────────────────────────────────────
-       Helpers
-    ────────────────────────────────────────────────────────────────── */
+    /* ── Helpers ─────────────────────────────────────────────────────── */
 
-    /** Show one state panel and hide the others. */
+    /** Switch between loading / error / dashboard panels. */
     function showState(id) {
       ['state-loading', 'state-error', 'state-dashboard'].forEach(function(s) {
         document.getElementById(s).style.display = (s === id) ? 'block' : 'none';
@@ -432,8 +350,8 @@
     }
 
     /**
-     * Format a historical stat (views / users over 30 days).
-     * Zero means data hasn't been processed yet — show a delay notice.
+     * Historical stat: 0 means GA4 hasn't finished processing yet.
+     * Show a gentle delay notice instead of a misleading zero.
      */
     function fmtHistorical(value) {
       if (value === 0 || value == null) {
@@ -443,32 +361,26 @@
     }
 
     /**
-     * Format a real-time stat (last 30 minutes).
-     * Zero is completely normal — it means nobody is on the page right now.
+     * Real-time stat: 0 is perfectly normal — nobody is on the page right now.
+     * Display as a plain number; the footer note provides context.
      */
     function fmtRealtime(value) {
-      if (value == null) {
-        return '<span class="no-data">—</span>';
-      }
-      return Number(value).toLocaleString();
+      return (value == null) ? '—' : Number(value).toLocaleString();
     }
 
-    /** Adjust the iframe height to fit the rendered content. */
+    /** Resize the iframe to fit content — called after every state change. */
     function syncHeight() {
       requestAnimationFrame(function() {
-        var h = document.body.scrollHeight;
-        CustomElement.setHeight(h + 4);
+        CustomElement.setHeight(document.body.scrollHeight + 4);
       });
     }
 
-    /* ──────────────────────────────────────────────────────────────────
-       Init
-    ────────────────────────────────────────────────────────────────── */
+    /* ── Init ─────────────────────────────────────────────────────────── */
     CustomElement.init(function(element, context) {
       var config      = element.config || {};
       var apiEndpoint = config.apiEndpoint;
 
-      /* Guard: apiEndpoint must be set in JSON parameters */
+      /* Config guard */
       if (!apiEndpoint || typeof apiEndpoint !== 'string') {
         document.getElementById('error-message').textContent =
           'Configuration error: "apiEndpoint" is missing from JSON parameters. ' +
@@ -478,13 +390,16 @@
         return;
       }
 
-      /* Populate item metadata in the header */
+      /* Populate header with item info */
       var codename = context.item.codename;
-      document.getElementById('item-name').textContent     = context.item.name;
+      var title    = context.item.name;
+      document.getElementById('item-title').textContent    = title;
       document.getElementById('item-codename').textContent = codename;
 
-      /* Fetch analytics */
-      var url = apiEndpoint + '?codename=' + encodeURIComponent(codename);
+      /* Build URL — pass both codename and pageTitle so the API can use either */
+      var url = apiEndpoint
+        + '?codename='  + encodeURIComponent(codename)
+        + '&pageTitle=' + encodeURIComponent(title);
 
       fetch(url)
         .then(function(res) {
@@ -492,22 +407,21 @@
           return res.json();
         })
         .then(function(data) {
-          /* ── Stat cards ── */
-          var h = data.historical || {};
-          var rt = data.realtime  || {};
+          var h  = data.historical || {};
+          var rt = data.realtime   || {};
 
           document.getElementById('stat-views').innerHTML = fmtHistorical(h.views);
           document.getElementById('stat-users').innerHTML = fmtHistorical(h.users);
-          document.getElementById('live-users').innerHTML = fmtRealtime(rt.activeUsers);
-          document.getElementById('live-views').innerHTML = fmtRealtime(rt.views);
+          document.getElementById('live-users').textContent = fmtRealtime(rt.activeUsers);
 
-          /* ── GA4 link ── */
+          /* GA4 link — hide the section entirely if not provided */
           var btn = document.getElementById('ga4-link');
+          var sec = btn.parentElement;
           if (data.gaLink) {
             btn.href = data.gaLink;
-            btn.style.display = 'flex';
+            sec.style.display = 'block';
           } else {
-            btn.style.display = 'none';
+            sec.style.display = 'none';
           }
 
           showState('state-dashboard');
