@@ -7,15 +7,33 @@
 [![Discord][discord-shield]][discord-url]
 
 
-# Kontent.ai React Custom Element Starter
+# GA4 Analytics Custom Element for Kontent.ai
 
-This starter can be used to jumpstart your own custom element development with Kontent.ai. It contains all the necessary tools for creating a new [Custom Element](https://kontent.ai/learn/docs/custom-elements), a UI extension for content editors.
+This custom element displays Google Analytics 4 data (page views and active users) for the current content item directly inside the Kontent.ai editing UI.
 
-You can inspire yourself by browsing already created integrations [**here**](https://github.com/topics/kontent-ai-integration).
+It fetches live stats from a serverless function using the item's codename and renders a clean dashboard that content editors can see without leaving the app.
 
-If you wish to include your integration into the mentioned list, please add the **kontent-ai-integration** topic into your github integration repository. 
+---
 
-Additional Kontent.ai GitHub resources and tutorials can be found on [kontent-ai.github.io](https://kontent-ai.github.io/).
+## JSON Parameters (Custom App Configuration)
+
+When adding this element to a **Content type** in Kontent.ai, you must provide the following JSON in the **JSON parameters** field of the Custom element settings:
+
+```json
+{
+  "apiEndpoint": "https://your-deployment.vercel.app/api/get-stats"
+}
+```
+
+| Parameter | Required | Description |
+|---|---|---|
+| `apiEndpoint` | Yes | Full URL of the serverless function that accepts a `?codename=` query parameter and returns `{ slug, screenPageViews, activeUsers }`. |
+
+The element will call `GET {apiEndpoint}?codename={item_codename}` and display the result. You can use a different endpoint URL per content type — just update the JSON parameters for each one.
+
+If the JSON parameters are missing or `apiEndpoint` is not a string, the element will display a configuration error before loading.
+
+---
 
 # Getting Started
 

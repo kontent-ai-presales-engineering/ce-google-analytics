@@ -1,9 +1,8 @@
 export type Config = Readonly<{
-  // Optional: specify which analytics service to simulate (e.g., "google-analytics", "custom")
-  analyticsService?: string;
-  // Optional: refresh interval in minutes (for demo purposes)
-  refreshInterval?: number;
+  apiEndpoint: string;
 }>;
 
-export const isConfig = (value: Readonly<Record<string, unknown>> | null) =>
-  value !== null; // use better check
+export const isConfig = (value: Readonly<Record<string, unknown>> | null): value is Config =>
+  value !== null &&
+  typeof value.apiEndpoint === 'string' &&
+  value.apiEndpoint.length > 0;
