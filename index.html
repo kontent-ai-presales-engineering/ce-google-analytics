@@ -453,10 +453,6 @@
             <div class="stat-label">Active Users</div>
             <div id="live-users" class="stat-value">—</div>
           </div>
-          <div>
-            <div class="stat-label">Views</div>
-            <div id="live-views" class="stat-value">—</div>
-          </div>
         </div>
       </div>
 
@@ -560,25 +556,24 @@
     }
 
     /**
-     * Format avg. engagement time (totalSeconds / users) as "Xm Ys".
+     * Format avg. engagement time (already averaged, in seconds) as "Xm Ys".
      */
-    function fmtEngagement(totalSeconds, users) {
-      if (!totalSeconds || !users) return '—';
-      var avg = totalSeconds / users;
-      var mins = Math.floor(avg / 60);
-      var secs = Math.round(avg % 60);
+    function fmtEngagement(avgSeconds) {
+      if (avgSeconds == null) return '—';
+      var mins = Math.floor(avgSeconds / 60);
+      var secs = Math.round(avgSeconds % 60);
       return mins > 0 ? mins + 'm ' + secs + 's' : secs + 's';
     }
 
     /**
      * Render top-3 traffic sources as a numbered list.
-     * sources: [{ source: string, users: number }, ...]
+     * topSources: [{ source: string, userCount: number }, ...]
      */
-    function renderSources(sources) {
-      if (!sources || sources.length === 0) {
+    function renderSources(topSources) {
+      if (!topSources || topSources.length === 0) {
         return '<span class="no-data">No data yet<br>(24–48h processing delay)</span>';
       }
-      return sources.slice(0, 3).map(function (s, i) {
+      return topSources.slice(0, 3).map(function (s, i) {
         var name = (s.source || 'Unknown').replace(/^\((.+)\)$/, '$1');
         name = name.charAt(0).toUpperCase() + name.slice(1);
         return '<div class="source-item">' +
@@ -626,12 +621,11 @@
           document.getElementById('stat-views').innerHTML = fmtHistorical(h.views);
           document.getElementById('stat-users').innerHTML = fmtHistorical(h.users);
           document.getElementById('stat-engagement').innerHTML =
-            (h.engagementDuration != null && h.users)
-              ? fmtEngagement(h.engagementDuration, h.users)
+            h.avgEngagementTime != null
+              ? fmtEngagement(h.avgEngagementTime)
               : '<span class="no-data">No data yet<br>(24–48h processing delay)</span>';
-          document.getElementById('sources-list').innerHTML = renderSources(h.sources);
+          document.getElementById('sources-list').innerHTML = renderSources(h.topSources);
           document.getElementById('live-users').innerHTML = fmtRealtime(rt.activeUsers);
-          document.getElementById('live-views').innerHTML = fmtRealtime(rt.views);
 
           /* ── GA4 link ── */
           var btn = document.getElementById('ga4-link');
