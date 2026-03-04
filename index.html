@@ -430,13 +430,21 @@
 
     </div><!-- /3-col grid -->
 
-    <!-- 2-column row: Sources + Live Now -->
-    <div class="grid grid--2">
+    <!-- 3-column row: Sources + Countries + Live Now -->
+    <div class="grid grid--3">
 
       <!-- Sources card -->
       <div class="card">
         <div class="card-label">Traffic Sources</div>
         <div id="sources-list" class="sources-list">
+          <span class="no-data">—</span>
+        </div>
+      </div>
+
+      <!-- Top Countries card -->
+      <div class="card">
+        <div class="card-label">Top Countries</div>
+        <div id="countries-list" class="sources-list">
           <span class="no-data">—</span>
         </div>
       </div>
@@ -456,7 +464,7 @@
         </div>
       </div>
 
-    </div><!-- /2-col grid -->
+    </div><!-- /3-col grid -->
 
     <!-- Guidelines row -->
     <div class="guidelines-row">
@@ -583,6 +591,23 @@
       }).join('');
     }
 
+    /**
+     * Render top-3 countries as a numbered list.
+     * topCountries: [{ country: string, userCount: number }, ...]
+     */
+    function renderCountries(topCountries) {
+      if (!topCountries || topCountries.length === 0) {
+        return '<span class="no-data">No data yet<br>(24–48h processing delay)</span>';
+      }
+      return topCountries.slice(0, 3).map(function (c, i) {
+        var name = c.country || 'Unknown';
+        return '<div class="source-item">' +
+          '<span class="source-rank">' + (i + 1) + '.</span>' +
+          '<span>' + name + '</span>' +
+          '</div>';
+      }).join('');
+    }
+
     /* ──────────────────────────────────────────────────────────────────
        Init
     ────────────────────────────────────────────────────────────────── */
@@ -625,6 +650,7 @@
               ? fmtEngagement(h.avgEngagementTime)
               : '<span class="no-data">No data yet<br>(24–48h processing delay)</span>';
           document.getElementById('sources-list').innerHTML = renderSources(h.topSources);
+          document.getElementById('countries-list').innerHTML = renderCountries(h.topCountries);
           document.getElementById('live-users').innerHTML = fmtRealtime(rt.activeUsers);
 
           /* ── GA4 link ── */
