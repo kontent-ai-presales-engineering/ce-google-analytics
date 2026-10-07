@@ -88,6 +88,14 @@
       border-radius: 8px;
     }
 
+    #state-not-published {
+      display: none;
+      padding: 14px 16px;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+    }
+
     #state-dashboard {
       display: none;
     }
@@ -394,6 +402,16 @@
     <div id="error-message" style="font-size:12px; color:#ef4444;"></div>
   </div>
 
+  <!-- ②b Not published state (API returned 404) ─────────────────────── -->
+  <div id="state-not-published">
+    <div style="font-size:13px; font-weight:600; color:#374151; margin-bottom:4px;">
+      This content is not published yet
+    </div>
+    <div style="font-size:12px; color:#6b7280;">
+      Analytics will appear here once the item is published and visitors start viewing the page.
+    </div>
+  </div>
+
   <!-- ③ Dashboard ──────────────────────────────────────────────────── -->
   <div id="state-dashboard">
 
@@ -528,7 +546,7 @@
 
     /** Show one state panel and hide the others. */
     function showState(id) {
-      ['state-loading', 'state-error', 'state-dashboard'].forEach(function (s) {
+      ['state-loading', 'state-error', 'state-not-published', 'state-dashboard'].forEach(function (s) {
         document.getElementById(s).style.display = (s === id) ? 'block' : 'none';
       });
     }
@@ -635,10 +653,18 @@
 
       fetch(url)
         .then(function (res) {
+          if (res.status === 404) return null;
           if (!res.ok) throw new Error('Request failed: ' + res.status + ' ' + res.statusText);
           return res.json();
         })
         .then(function (data) {
+          /* ── 404: item not published yet ── */
+          if (data === null) {
+            showState('state-not-published');
+            syncHeight();
+            return;
+          }
+
           /* ── Stat cards ── */
           var h = data.historical || {};
           var rt = data.realtime || {};
